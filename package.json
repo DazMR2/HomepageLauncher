@@ -1,0 +1,43 @@
+{
+  "name": "homepage-launcher",
+  "version": "1.0.0",
+  "description": "A Windows desktop launcher for websites and local apps.",
+  "author": "Homepage Launcher",
+  "main": "main.cjs",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --dir",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.homepagelauncher.app",
+    "productName": "Homepage Launcher",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "app-targets.cjs",
+      "validation.cjs",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "portable": {
+      "artifactName": "Homepage-Launcher-${version}-portable.${ext}"
+    }
+  }
+}
