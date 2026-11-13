@@ -31,13 +31,15 @@
     "win": {
       "target": [
         {
-          "target": "portable",
+          "target": "nsis",
           "arch": ["x64"]
         }
       ]
     },
-    "portable": {
-      "artifactName": "Homepage-Launcher-${version}-portable.${ext}"
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Homepage-Launcher-Setup-${version}.${ext}"
     }
   }
 }
