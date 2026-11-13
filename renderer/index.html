@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
+  <title>Homepage Launcher</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="renderer.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">H</div>
+        <div>
+          <p class="eyebrow">YOUR DESKTOP STARTING POINT</p>
+          <h1>Home</h1>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="button button-subtle nav-primary" id="toggle-controller" type="button">Controller: Auto</button>
+        <button class="button button-subtle nav-primary" id="toggle-fullscreen" type="button">Full screen</button>
+        <button class="button button-subtle nav-primary" id="background-settings" type="button">Background color</button>
+        <button class="button button-subtle nav-primary" id="refresh-previews" type="button">Refresh snapshots</button>
+        <button class="button button-subtle nav-primary" id="add-group" type="button">Add group</button>
+        <button class="button button-subtle nav-primary" id="scan-apps" type="button">Scan folders</button>
+        <button class="button button-secondary nav-primary" id="add-app" type="button">Add local app</button>
+        <button class="button button-primary nav-primary" id="add-site" type="button">+ Add website</button>
+      </div>
+    </header>
+
+    <section class="section apps-section" aria-labelledby="apps-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">QUICK LAUNCH</p>
+          <h2 id="apps-heading">Apps</h2>
+        </div>
+        <span class="section-note">Office, Teams, and your local apps by group</span>
+      </div>
+      <div class="app-groups" id="app-row"></div>
+    </section>
+
+    <section class="section sites-section" aria-labelledby="sites-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">YOUR FAVORITES</p>
+          <h2 id="sites-heading">Websites</h2>
+        </div>
+        <span class="section-note" id="site-count"></span>
+      </div>
+      <div class="sites-groups" id="sites-groups"></div>
+    </section>
+
+    <footer class="footer">
+      <span>Click a website tile to open it in your browser or in a chrome-less launcher window.</span>
+      <span>Drag tiles to rearrange; pin favorites to keep them at the top.</span>
+      <span id="controller-status">Controller: waiting</span>
+    </footer>
+  </main>
+
+  <dialog id="site-dialog" class="dialog">
+    <form id="site-form" method="dialog">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">WEBSITE TILE</p>
+          <h2 id="site-dialog-title">Add a website</h2>
+        </div>
+        <button class="icon-button" type="button" data-close-dialog aria-label="Close">×</button>
+      </div>
+      <label for="site-title">Title</label>
+      <input id="site-title" name="title" maxlength="50" required autocomplete="off" placeholder="For example, Microsoft Learn">
+      <label for="site-url">Website address</label>
+      <input id="site-url" name="url" type="text" required autocomplete="url" placeholder="https://learn.microsoft.com">
+      <label for="site-group">Group</label>
+      <select id="site-group" name="groupId" required></select>
+      <label class="checkbox-row">
+        <input id="site-open-in-launcher" name="openInLauncher" type="checkbox">
+        Open inside launcher window (no browser chrome, press Esc to close)
+      </label>
+      <label for="site-thumbnail-path">Custom thumbnail (optional)</label>
+      <div class="file-picker">
+        <input id="site-thumbnail-path" name="thumbnailPath" readonly placeholder="Use snapshot by default">
+        <button class="button button-secondary" id="browse-site-thumbnail" type="button">Browse</button>
+      </div>
+      <div class="inline-actions">
+        <button class="button button-subtle" id="clear-site-thumbnail" type="button">Use auto snapshot</button>
+      </div>
+      <p class="field-note">A snapshot is captured when the tile is saved. Some sites may block previews.</p>
+      <p class="form-error" id="site-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button class="button button-subtle" type="button" data-close-dialog>Cancel</button>
+        <button class="button button-primary" id="site-submit" type="submit">Add website</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="app-dialog" class="dialog">
+    <form id="app-form" method="dialog">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">LOCAL APP</p>
+          <h2>Add an app shortcut</h2>
+        </div>
+        <button class="icon-button" type="button" data-close-dialog aria-label="Close">×</button>
+      </div>
+      <label for="app-title">Title</label>
+      <input id="app-title" name="title" maxlength="50" required autocomplete="off" placeholder="For example, OneNote">
+      <label for="app-target">Application file or link</label>
+      <div class="file-picker">
+        <input id="app-target" name="target" required autocomplete="off" placeholder="C:\Program Files\App\App.exe">
+        <button class="button button-secondary" id="browse-app" type="button">Browse</button>
+      </div>
+      <label for="app-group">Group</label>
+      <select id="app-group" name="groupId" required></select>
+      <label for="app-icon-path">Custom icon (optional)</label>
+      <div class="file-picker">
+        <input id="app-icon-path" name="iconPath" readonly placeholder="Use default icon">
+        <button class="button button-secondary" id="browse-app-icon" type="button">Browse</button>
+      </div>
+      <p class="field-note">Choose a local .exe or .lnk file. HTTP(S) links and supported Office/Teams links also work.</p>
+      <p class="form-error" id="app-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button class="button button-subtle" type="button" data-close-dialog>Cancel</button>
+        <button class="button button-primary" type="submit">Add app</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="scan-dialog" class="dialog">
+    <form id="scan-form" method="dialog">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">LOCAL APP SCAN</p>
+          <h2>Scan folders for apps</h2>
+        </div>
+        <button class="icon-button" type="button" data-close-dialog aria-label="Close">×</button>
+      </div>
+      <label for="scan-folders">Folders to scan</label>
+      <textarea id="scan-folders" name="folders" rows="3" placeholder="C:\Program Files; C:\Tools"></textarea>
+      <div class="inline-actions">
+        <button class="button button-secondary" id="browse-scan-folders" type="button">Browse folders</button>
+        <button class="button button-subtle" id="run-app-scan" type="button">Scan now</button>
+      </div>
+      <label for="scan-group">Add selected apps to group</label>
+      <select id="scan-group" name="groupId" required></select>
+      <div class="scan-results" id="scan-results"></div>
+      <p class="form-error" id="scan-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button class="button button-subtle" type="button" data-close-dialog>Cancel</button>
+        <button class="button button-primary" type="submit">Add selected apps</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="group-dialog" class="dialog">
+    <form id="group-form" method="dialog">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">GROUPS</p>
+          <h2>Create a new group</h2>
+        </div>
+        <button class="icon-button" type="button" data-close-dialog aria-label="Close">×</button>
+      </div>
+      <label for="group-title">Group name</label>
+      <input id="group-title" name="title" maxlength="50" required autocomplete="off" placeholder="For example, Daily tools">
+      <p class="form-error" id="group-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button class="button button-subtle" type="button" data-close-dialog>Cancel</button>
+        <button class="button button-primary" type="submit">Create group</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="background-dialog" class="dialog">
+    <form id="background-form" method="dialog">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">DASHBOARD</p>
+          <h2>Background color</h2>
+        </div>
+        <button class="icon-button" type="button" data-close-dialog aria-label="Close">×</button>
+      </div>
+      <label for="background-color">Choose color</label>
+      <input id="background-color" name="backgroundColor" type="color" value="#101821">
+      <div class="background-presets" id="background-presets">
+        <button type="button" class="preset-swatch" data-color="#101821" title="Midnight Blue"></button>
+        <button type="button" class="preset-swatch" data-color="#1a1d33" title="Indigo Night"></button>
+        <button type="button" class="preset-swatch" data-color="#1f2f2f" title="Teal Slate"></button>
+        <button type="button" class="preset-swatch" data-color="#2d1d2f" title="Plum Dusk"></button>
+        <button type="button" class="preset-swatch" data-color="#2f2618" title="Bronze Night"></button>
+      </div>
+      <p class="field-note">This updates the launcher background instantly and saves it for future launches.</p>
+      <p class="form-error" id="background-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button class="button button-subtle" type="button" data-close-dialog>Cancel</button>
+        <button class="button button-primary" type="submit">Save color</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
